@@ -6028,71 +6028,137 @@ const _super = (function (geti, seti) {
                 write("void 0");
             }
 
-            function emitSerializedTypeNode(node: TypeNode) {
-                if (node) {
+            function getSerializedTypeNode(node: TypeNode): string {
+              if (node) {
                     switch (node.kind) {
                         case SyntaxKind.VoidKeyword:
-                            write("void 0");
-                            return;
+                            return "void 0";
 
                         case SyntaxKind.ParenthesizedType:
-                            emitSerializedTypeNode((<ParenthesizedTypeNode>node).type);
-                            return;
+                            return getSerializedTypeNode((<ParenthesizedTypeNode>node).type);
 
                         case SyntaxKind.FunctionType:
                         case SyntaxKind.ConstructorType:
-                            write("Function");
-                            return;
+                            return "Function";
 
                         case SyntaxKind.ArrayType:
                         case SyntaxKind.TupleType:
                             // Begin original
-                            /* write("Array"); */
+                            // write("Array");
+                            // return;
                             // End original
                             // Begin dirty ---------------------------------------------------------------------------
-                            let nodeCopy: any = node;
-                            let _elemType = nodeCopy.elementType.typeName.text;
-                            write("{name: 'Array<" + _elemType + ">', type:'Array', elemType:'" + _elemType + "'}");
+                            let _elemType = getSerializedTypeNode((<any>node).elementType);
+                            return ("{name: 'Array', type:'Array<" + _elemType + ">', elemType:'" + _elemType + "'}");
                             // console.log("*** emitSerializedTypeNode: Array, type: ", node.elementType.typeName.text);
                             // End dirty -----------------------------------------------------------------------------
-                           return;
 
                         case SyntaxKind.TypePredicate:
                         case SyntaxKind.BooleanKeyword:
-                            write("Boolean");
-                            return;
+                            return "Boolean";
 
                         case SyntaxKind.StringKeyword:
                         case SyntaxKind.LiteralType:
-                            write("String");
-                            return;
+                            return "String";
 
                         case SyntaxKind.NumberKeyword:
-                            write("Number");
-                            return;
+                            return "Number";
 
                         case SyntaxKind.SymbolKeyword:
-                            write("Symbol");
-                            return;
-
-                        case SyntaxKind.TypeReference:
-                            emitSerializedTypeReferenceNode(<TypeReferenceNode>node);
-                            return;
-
-                        case SyntaxKind.TypeQuery:
-                        case SyntaxKind.TypeLiteral:
-                        case SyntaxKind.UnionType:
-                        case SyntaxKind.IntersectionType:
-                        case SyntaxKind.AnyKeyword:
-                        case SyntaxKind.ThisType:
-                            break;
+                            return "Symbol";
 
                         default:
                             Debug.fail("Cannot serialize unexpected type node.");
                             break;
                     }
                 }
-                write("Object");
+                return "Object";
+            }
+
+            function emitSerializedTypeNode(node: TypeNode) {
+              if (node) {
+                //begin modified code -----------------------------------------
+                switch (node.kind){
+                  case SyntaxKind.ParenthesizedType:
+                    write(getSerializedTypeNode((<ParenthesizedTypeNode>node).type));
+                    return;
+
+                  case SyntaxKind.TypeReference:
+                    emitSerializedTypeReferenceNode(<TypeReferenceNode>node);
+                    return;
+
+                  case SyntaxKind.TypeQuery:
+                  case SyntaxKind.TypeLiteral:
+                  case SyntaxKind.UnionType:
+                  case SyntaxKind.IntersectionType:
+                  case SyntaxKind.AnyKeyword:
+                  case SyntaxKind.ThisType:
+                    break;
+
+                  default:
+                    write(getSerializedTypeNode(node));
+                    return;
+                }
+                //end modified code -------------------------------------------
+                /*
+                // begin original code  ---------------------------------------
+                  switch (node.kind) {
+                      case SyntaxKind.VoidKeyword:
+                          write("void 0");
+                          return;
+
+                      case SyntaxKind.ParenthesizedType:
+                          emitSerializedTypeNode((<ParenthesizedTypeNode>node).type);
+                          return;
+
+                      case SyntaxKind.FunctionType:
+                      case SyntaxKind.ConstructorType:
+                          write("Function");
+                          return;
+
+                      case SyntaxKind.ArrayType:
+                      case SyntaxKind.TupleType:
+                          write("Array");
+                         return;
+
+                      case SyntaxKind.TypePredicate:
+                      case SyntaxKind.BooleanKeyword:
+                          write("Boolean");
+                          return;
+
+                      case SyntaxKind.StringKeyword:
+                      case SyntaxKind.LiteralType:
+                          write("String");
+                          return;
+
+                      case SyntaxKind.NumberKeyword:
+                          write("Number");
+                          return;
+
+                      case SyntaxKind.SymbolKeyword:
+                          write("Symbol");
+                          return;
+
+                      case SyntaxKind.TypeReference:
+                          emitSerializedTypeReferenceNode(<TypeReferenceNode>node);
+                          return;
+
+                      case SyntaxKind.TypeQuery:
+                      case SyntaxKind.TypeLiteral:
+                      case SyntaxKind.UnionType:
+                      case SyntaxKind.IntersectionType:
+                      case SyntaxKind.AnyKeyword:
+                      case SyntaxKind.ThisType:
+                          break;
+
+                      default:
+                          Debug.fail("Cannot serialize unexpected type node.");
+                          break;
+                  }
+              // end original code --------------------------------------------
+              */
+              }
+              write("Object");
             }
 
             /** Serializes a TypeReferenceNode to an appropriate JS constructor value. Used by the __metadata decorator. */
