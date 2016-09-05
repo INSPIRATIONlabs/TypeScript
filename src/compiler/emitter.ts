@@ -6046,8 +6046,16 @@ const _super = (function (geti, seti) {
 
                         case SyntaxKind.ArrayType:
                         case SyntaxKind.TupleType:
-                            write("Array");
-                            return;
+                            // Begin original
+                            /* write("Array"); */
+                            // End original
+                            // Begin dirty ---------------------------------------------------------------------------
+                            let nodeCopy: any = node;
+                            let _elemType = nodeCopy.elementType.typeName.text;
+                            write("{name: 'Array<" + _elemType + ">', type:'Array', elemType:'" + _elemType + "'}");
+                            // console.log("*** emitSerializedTypeNode: Array, type: ", node.elementType.typeName.text);
+                            // End dirty -----------------------------------------------------------------------------
+                           return;
 
                         case SyntaxKind.TypePredicate:
                         case SyntaxKind.BooleanKeyword:
