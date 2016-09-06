@@ -617,6 +617,9 @@ namespace ts {
     export let fullTripleSlashAMDReferencePathRegEx = /^(\/\/\/\s*<amd-dependency\s+path\s*=\s*)('|")(.+?)\2.*?\/>/;
 
     export function isTypeNode(node: Node): boolean {
+        if(!node){
+          return false;
+        }
         if (SyntaxKind.FirstTypeNode <= node.kind && node.kind <= SyntaxKind.LastTypeNode) {
             return true;
         }
@@ -1036,6 +1039,7 @@ namespace ts {
     }
 
     export function isCallLikeExpression(node: Node): node is CallLikeExpression {
+      if (node){
         switch (node.kind) {
             case SyntaxKind.CallExpression:
             case SyntaxKind.NewExpression:
@@ -1045,6 +1049,7 @@ namespace ts {
             default:
                 return false;
         }
+      }
     }
 
     export function getInvokedExpression(node: CallLikeExpression): Expression {
@@ -1109,6 +1114,7 @@ namespace ts {
     }
 
     export function isExpression(node: Node): boolean {
+      if (node) {
         switch (node.kind) {
             case SyntaxKind.ThisKeyword:
             case SyntaxKind.SuperKeyword:
@@ -1208,6 +1214,7 @@ namespace ts {
                             return true;
                         }
                 }
+            }
         }
         return false;
     }
@@ -1546,6 +1553,7 @@ namespace ts {
     }
 
     export function isDeclaration(node: Node): boolean {
+      if(node){
         switch (node.kind) {
             case SyntaxKind.ArrowFunction:
             case SyntaxKind.BindingElement:
@@ -1578,6 +1586,7 @@ namespace ts {
             case SyntaxKind.VariableDeclaration:
             case SyntaxKind.JSDocTypedefTag:
                 return true;
+          }
         }
         return false;
     }
@@ -1694,6 +1703,7 @@ namespace ts {
     // export = <EntityNameExpression>
     // export default <EntityNameExpression>
     export function isAliasSymbolDeclaration(node: Node): boolean {
+      if (node) {
         return node.kind === SyntaxKind.ImportEqualsDeclaration ||
             node.kind === SyntaxKind.NamespaceExportDeclaration ||
             node.kind === SyntaxKind.ImportClause && !!(<ImportClause>node).name ||
@@ -1701,6 +1711,10 @@ namespace ts {
             node.kind === SyntaxKind.ImportSpecifier ||
             node.kind === SyntaxKind.ExportSpecifier ||
             node.kind === SyntaxKind.ExportAssignment && exportAssignmentIsAlias(<ExportAssignment>node);
+          }
+          else {
+            return false;
+          }
     }
 
     export function exportAssignmentIsAlias(node: ExportAssignment): boolean {
