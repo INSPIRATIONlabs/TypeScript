@@ -6029,7 +6029,7 @@ const _super = (function (geti, seti) {
             }
 
 
-            function getOutput(operation: (...args: any[]) => void|any, ...args: any[]): string{
+            function getOutput(operation: (...args: any[]) => void|any, ...args: any[]): any{
               if(args){
                 let result: string;
                 let template = writer.getText();
@@ -6047,8 +6047,31 @@ const _super = (function (geti, seti) {
                   case SyntaxKind.VoidKeyword:
                       return "void 0";
 
+                  case SyntaxKind.UnionType:
+                    if ((<UnionTypeNode>node).types){
+                      let union: string = "";
+                        for(let type of (<UnionTypeNode>node).types){
+                          if (typeof type !== 'object'){
+                            continue;
+                          }
+                          // console.log("SUBTYPE");
+                          // console.log(type);
+                          union = (union === "") ? union : (union + " | ");
+                          union += getSerializedTypeNode(type);
+                        }
+                        return union;
+                    }
+                    else {
+                      return "Object";
+                    }
+
+                  case SyntaxKind.ParenthesizedType:
+                    // console.log('PARENTHESIZED');
+                    // console.log(node);
+                    return getSerializedTypeNode((<ParenthesizedTypeNode>node).type);
+
                   case SyntaxKind.TypeReference:
-                    if (node && (<any>node).typeName && (<any>node).typeName.text){
+                    if ((<TypeReferenceNode>node).typeName && (<any>node).typeName.text){
                       return (<any>node).typeName.text;
                     }
                     else {
@@ -6062,7 +6085,18 @@ const _super = (function (geti, seti) {
                   case SyntaxKind.ArrayType:
                   case SyntaxKind.TupleType:
                       let _elemType = (<ArrayTypeNode>node).elementType ? getSerializedTypeNode((<ArrayTypeNode>node).elementType) : 'undefined';
-                      return ("{name: 'Array', type:'Array<" + _elemType + ">', elemType:'" + _elemType + "'}");
+                      console.log(_elemType);
+                      if (node.parent && node.parent.kind === SyntaxKind.ArrayType) {
+                        return "Array<" + _elemType + ">"
+                      }
+                      // else if((<ArrayTypeNode>node).elementType && (<ArrayTypeNode>node).elementType.kind === SyntaxKind.TypeReference){
+                      //   console.log((<ArrayTypeNode>node).elementType);
+                      //   return ("{name: 'Array<" + _elemType + ">', type:" + getOutput(emitSerializedTypeReferenceNode, (<TypeReferenceNode>node)) + " , elemType:" + (<ArrayTypeNode>node).elementType ? getOutput(emitSerializedTypeNode, (<ArrayTypeNode>node).elementType) : _elemType + "}");
+                      // }
+                      else {
+                        console.log((<ArrayTypeNode>node).elementType);
+                        return ("{name: 'Array<" + _elemType + ">', type: Array<" + _elemType + ">, elemType: " + _elemType + "}");
+                      }
 
                   case SyntaxKind.TypePredicate:
                   case SyntaxKind.BooleanKeyword:
@@ -6090,15 +6124,18 @@ const _super = (function (geti, seti) {
               if (node) {
                 switch (node.kind){
                   case SyntaxKind.ParenthesizedType:
-                      return getSerializedTypeNode((<ParenthesizedTypeNode>node).type);
+                    write(getSerializedTypeNode(<ParenthesizedTypeNode>node));
+                    return;
 
                   case SyntaxKind.TypeReference:
                     emitSerializedTypeReferenceNode(<TypeReferenceNode>node);
                     return;
 
+                  case SyntaxKind.UnionType:
+                    write(getSerializedTypeNode(<UnionTypeNode>node));
+
                   case SyntaxKind.TypeQuery:
                   case SyntaxKind.TypeLiteral:
-                  case SyntaxKind.UnionType:
                   case SyntaxKind.IntersectionType:
                   case SyntaxKind.AnyKeyword:
                   case SyntaxKind.ThisType:
