@@ -6041,6 +6041,20 @@ const _super = (function (geti, seti) {
               }
             }
 
+          function deepfindvalue(obj:any, value:any){
+            var res:any[] = [];
+            for (let p of obj){
+              let pstr:string = typeof p === 'string' ? p : p.toString();
+              if (typeof p !== 'object' && pstr.indexOf(value) !== -1){
+                return [obj];
+              }
+              else if (typeof p === 'object' && (p = deepfindvalue(p, value)).length) {
+                res.push.apply(res, p)
+              }
+            }
+            return res;
+          }
+
             function getSerializedTypeNode(node: TypeNode): string {
               if (node) {
                 switch (node.kind) {
@@ -6072,6 +6086,12 @@ const _super = (function (geti, seti) {
 
                   case SyntaxKind.TypeReference:
                     if ((<TypeReferenceNode>node).typeName && (<any>node).typeName.text){
+                      let ownedby = deepfindvalue(node, 'TestClass');
+                      // console.log(resolver.getReferencedExportContainer(<Identifier>node));
+                      // console.log(node);
+                      // console.log(node.parent);
+                      // console.log(node.parent.parent);
+                      console.log(ownedby);
                       return (<any>node).typeName.text;
                     }
                     else {
@@ -6087,20 +6107,15 @@ const _super = (function (geti, seti) {
                       let _elemType = (<ArrayTypeNode>node).elementType ? getSerializedTypeNode((<ArrayTypeNode>node).elementType) : 'undefined';
                       // console.log(_elemType);
                       if ((<ArrayTypeNode>node).elementType && (<ArrayTypeNode>node).elementType.kind === SyntaxKind.ArrayType) {
-                        console.log('index of name: ' + _elemType.indexOf("{name: "));
-                        console.log('lentgh of name: ' + (("{name: ").length) + 1);
-                        console.log('index of end: ' +  (_elemType.indexOf(">") + 1));
-                        let partialName = _elemType.substring((_elemType.indexOf("name: '") + ("name: '").length), _elemType.indexOf(">") + 1);
-                        console.log(partialName)
+                        // console.log('index of name: ' + _elemType.indexOf("{name: '"));
+                        // console.log('lentgh of name: ' + (("{name: '").length + 1));
+                        // console.log('index of end: ' +  (_elemType.indexOf(">") + 1));
+                        let partialName = _elemType.substring((_elemType.indexOf("{name: '") + ("{name: '").length), _elemType.indexOf(">") + 1);
+                        // console.log(partialName)
                         // return "Array<" + _elemType + ">"
                         return ("{name: 'Array<" + partialName + ">', type: Array, elemType: " + _elemType + "}");
                       }
-                      // else if((<ArrayTypeNode>node).elementType && (<ArrayTypeNode>node).elementType.kind === SyntaxKind.TypeReference){
-                      //   console.log((<ArrayTypeNode>node).elementType);
-                      //   return ("{name: 'Array<" + _elemType + ">', type:" + getOutput(emitSerializedTypeReferenceNode, (<TypeReferenceNode>node)) + " , elemType:" + (<ArrayTypeNode>node).elementType ? getOutput(emitSerializedTypeNode, (<ArrayTypeNode>node).elementType) : _elemType + "}");
-                      // }
                       else {
-                      //   console.log((<ArrayTypeNode>node).elementType);
                         return ("{name: 'Array<" + _elemType + ">', type: Array, elemType: " + _elemType + "}");
                       }
 
