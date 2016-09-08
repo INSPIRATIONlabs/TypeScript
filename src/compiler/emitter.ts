@@ -6085,17 +6085,23 @@ const _super = (function (geti, seti) {
                   case SyntaxKind.ArrayType:
                   case SyntaxKind.TupleType:
                       let _elemType = (<ArrayTypeNode>node).elementType ? getSerializedTypeNode((<ArrayTypeNode>node).elementType) : 'undefined';
-                      console.log(_elemType);
-                      if (node.parent && node.parent.kind === SyntaxKind.ArrayType) {
-                        return "Array<" + _elemType + ">"
+                      // console.log(_elemType);
+                      if ((<ArrayTypeNode>node).elementType && (<ArrayTypeNode>node).elementType.kind === SyntaxKind.ArrayType) {
+                        console.log('index of name: ' + _elemType.indexOf("{name: "));
+                        console.log('lentgh of name: ' + (("{name: ").length) + 1);
+                        console.log('index of end: ' +  (_elemType.indexOf(">") + 1));
+                        let partialName = _elemType.substring((_elemType.indexOf("name: '") + ("name: '").length), _elemType.indexOf(">") + 1);
+                        console.log(partialName)
+                        // return "Array<" + _elemType + ">"
+                        return ("{name: 'Array<" + partialName + ">', type: Array, elemType: " + _elemType + "}");
                       }
                       // else if((<ArrayTypeNode>node).elementType && (<ArrayTypeNode>node).elementType.kind === SyntaxKind.TypeReference){
                       //   console.log((<ArrayTypeNode>node).elementType);
                       //   return ("{name: 'Array<" + _elemType + ">', type:" + getOutput(emitSerializedTypeReferenceNode, (<TypeReferenceNode>node)) + " , elemType:" + (<ArrayTypeNode>node).elementType ? getOutput(emitSerializedTypeNode, (<ArrayTypeNode>node).elementType) : _elemType + "}");
                       // }
                       else {
-                        console.log((<ArrayTypeNode>node).elementType);
-                        return ("{name: 'Array<" + _elemType + ">', type: Array<" + _elemType + ">, elemType: " + _elemType + "}");
+                      //   console.log((<ArrayTypeNode>node).elementType);
+                        return ("{name: 'Array<" + _elemType + ">', type: Array, elemType: " + _elemType + "}");
                       }
 
                   case SyntaxKind.TypePredicate:
