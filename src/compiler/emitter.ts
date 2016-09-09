@@ -6041,17 +6041,38 @@ const _super = (function (geti, seti) {
               }
             }
 
-          function deepfindvalue(obj:any, value:any){
+          function deepfindvalueorkey(obj:any, value?:string, key?:string):any[]{
             var res:any[] = [];
-            for (let p of obj){
+            if (key){
+              for (let k in obj){
+                if (k === key){
+                  return [obj[key]];
+                }
+                else if (typeof obj[k] === 'object' && deepfindvalueorkey(obj[k], null, key).length)
+                {
+                  res.push(deepfindvalueorkey(obj[k], null, key)[0]);
+                }
+              }
+            }
+            if (value)
+            {
+              for (let p of obj){
               let pstr:string = typeof p === 'string' ? p : p.toString();
               if (typeof p !== 'object' && pstr.indexOf(value) !== -1){
                 return [obj];
               }
-              else if (typeof p === 'object' && (p = deepfindvalue(p, value)).length) {
-                res.push.apply(res, p)
+              else if (typeof p === 'object' && (deepfindvalueorkey(p, value, null)).length) {
+                res.push(deepfindvalueorkey(p, value, null)[0]);
               }
             }
+            // if (obj.parent && typeof obj.parent.parent === 'undefined'){
+            //   console.log(obj.parent);
+            //   console.log(obj);
+            // }
+            if (obj.parent && (deepfindvalueorkey(obj.parent, value, key)).length) {
+              res.push(deepfindvalueorkey(obj.parent, value, key)[0]);
+            }
+          }
             return res;
           }
 
@@ -6086,12 +6107,13 @@ const _super = (function (geti, seti) {
 
                   case SyntaxKind.TypeReference:
                     if ((<TypeReferenceNode>node).typeName && (<any>node).typeName.text){
-                      let ownedby = deepfindvalue(node, 'TestClass');
+                      // let ownedby = getNamespaceDeclarationNode(node); //deepfindvalue(node, 'TestClass');
+                      let declarations = deepfindvalueorkey(node, null, 'dependencies');
                       // console.log(resolver.getReferencedExportContainer(<Identifier>node));
                       // console.log(node);
                       // console.log(node.parent);
                       // console.log(node.parent.parent);
-                      console.log(ownedby);
+                      console.log(declarations);
                       return (<any>node).typeName.text;
                     }
                     else {
