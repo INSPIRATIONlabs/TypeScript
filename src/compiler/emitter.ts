@@ -6072,17 +6072,21 @@ const _super = (function (geti, seti) {
                     return getSerializedTypeNode((<ParenthesizedTypeNode>node).type);
 
                   case SyntaxKind.TypeReference:
-                      return getOutput(emitSerializedTypeReferenceNode, (<TypeReferenceNode>node));
+                    return getOutput(emitSerializedTypeReferenceNode, (<TypeReferenceNode>node));
 
                   case SyntaxKind.FunctionType:
                   case SyntaxKind.ConstructorType:
-                      return "Function";
+                    return "Function";
 
                   case SyntaxKind.ArrayType:
                   case SyntaxKind.TupleType:
                       let _elemType = (<ArrayTypeNode>node).elementType ? getSerializedTypeNode((<ArrayTypeNode>node).elementType) : 'undefined';
                       if ((<ArrayTypeNode>node).elementType && (<ArrayTypeNode>node).elementType.kind === SyntaxKind.ArrayType) {
                         let partialName = _elemType.substring((_elemType.indexOf("{name: '") + ("{name: '").length), _elemType.indexOf(">") + 1);
+                        return ("{name: 'Array<" + partialName + ">', type: Array, elemType: " + _elemType + "}");
+                      }
+                      else if ((<ArrayTypeNode>node).elementType && (<ArrayTypeNode>node).elementType.kind === SyntaxKind.TypeReference){
+                        let partialName = _elemType.substring((_elemType.lastIndexOf(".") + 1));
                         return ("{name: 'Array<" + partialName + ">', type: Array, elemType: " + _elemType + "}");
                       }
                       else {
@@ -6124,6 +6128,7 @@ const _super = (function (geti, seti) {
 
                   case SyntaxKind.UnionType:
                     write(getSerializedTypeNode(<UnionTypeNode>node));
+                    return;
 
                   case SyntaxKind.TypeQuery:
                   case SyntaxKind.TypeLiteral:
