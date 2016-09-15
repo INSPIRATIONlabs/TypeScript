@@ -2,6 +2,7 @@
 /// <reference path="sourcemap.ts" />
 /// <reference path="declarationEmitter.ts"/>
 
+
 /* @internal */
 namespace ts {
     export function getResolvedExternalModuleName(host: EmitHost, file: SourceFile): string {
@@ -6032,49 +6033,18 @@ const _super = (function (geti, seti) {
             function getOutput(operation: (...args: any[]) => void|any, ...args: any[]): any{
               if(args){
                 let result: string;
-                let template = writer.getText();
+                let indent: number = writer.getIndent();
+                let template: string = writer.getText();
                 operation(...args);
                 result = writer.getText().replace(template, '');
                 writer.reset();
-                write(template);
+                writer.rawWriteLiteral(template);
+                for (let i = 0; i< indent; i++){
+                  writer.increaseIndent();
+                }
                 return result;
               }
             }
-
-          function deepfindvalueorkey(obj:any, value?:string, key?:string):any[]{
-            var res:any[] = [];
-            if (key){
-              for (let k in obj){
-                if (k === key){
-                  return [obj[key]];
-                }
-                else if (typeof obj[k] === 'object' && deepfindvalueorkey(obj[k], null, key).length)
-                {
-                  res.push(deepfindvalueorkey(obj[k], null, key)[0]);
-                }
-              }
-            }
-            if (value)
-            {
-              for (let p of obj){
-              let pstr:string = typeof p === 'string' ? p : p.toString();
-              if (typeof p !== 'object' && pstr.indexOf(value) !== -1){
-                return [obj];
-              }
-              else if (typeof p === 'object' && (deepfindvalueorkey(p, value, null)).length) {
-                res.push(deepfindvalueorkey(p, value, null)[0]);
-              }
-            }
-            // if (obj.parent && typeof obj.parent.parent === 'undefined'){
-            //   console.log(obj.parent);
-            //   console.log(obj);
-            // }
-            if (obj.parent && (deepfindvalueorkey(obj.parent, value, key)).length) {
-              res.push(deepfindvalueorkey(obj.parent, value, key)[0]);
-            }
-          }
-            return res;
-          }
 
             function getSerializedTypeNode(node: TypeNode): string {
               if (node) {
@@ -6089,8 +6059,6 @@ const _super = (function (geti, seti) {
                           if (typeof type !== 'object'){
                             continue;
                           }
-                          // console.log("SUBTYPE");
-                          // console.log(type);
                           union = (union === "") ? union : (union + " | ");
                           union += getSerializedTypeNode(type);
                         }
@@ -6101,24 +6069,10 @@ const _super = (function (geti, seti) {
                     }
 
                   case SyntaxKind.ParenthesizedType:
-                    // console.log('PARENTHESIZED');
-                    // console.log(node);
                     return getSerializedTypeNode((<ParenthesizedTypeNode>node).type);
 
                   case SyntaxKind.TypeReference:
-                    if ((<TypeReferenceNode>node).typeName && (<any>node).typeName.text){
-                      // let ownedby = getNamespaceDeclarationNode(node); //deepfindvalue(node, 'TestClass');
-                      let declarations = deepfindvalueorkey(node, null, 'dependencies');
-                      // console.log(resolver.getReferencedExportContainer(<Identifier>node));
-                      // console.log(node);
-                      // console.log(node.parent);
-                      // console.log(node.parent.parent);
-                      console.log(declarations);
-                      return (<any>node).typeName.text;
-                    }
-                    else {
                       return getOutput(emitSerializedTypeReferenceNode, (<TypeReferenceNode>node));
-                    }
 
                   case SyntaxKind.FunctionType:
                   case SyntaxKind.ConstructorType:
@@ -6127,14 +6081,8 @@ const _super = (function (geti, seti) {
                   case SyntaxKind.ArrayType:
                   case SyntaxKind.TupleType:
                       let _elemType = (<ArrayTypeNode>node).elementType ? getSerializedTypeNode((<ArrayTypeNode>node).elementType) : 'undefined';
-                      // console.log(_elemType);
                       if ((<ArrayTypeNode>node).elementType && (<ArrayTypeNode>node).elementType.kind === SyntaxKind.ArrayType) {
-                        // console.log('index of name: ' + _elemType.indexOf("{name: '"));
-                        // console.log('lentgh of name: ' + (("{name: '").length + 1));
-                        // console.log('index of end: ' +  (_elemType.indexOf(">") + 1));
                         let partialName = _elemType.substring((_elemType.indexOf("{name: '") + ("{name: '").length), _elemType.indexOf(">") + 1);
-                        // console.log(partialName)
-                        // return "Array<" + _elemType + ">"
                         return ("{name: 'Array<" + partialName + ">', type: Array, elemType: " + _elemType + "}");
                       }
                       else {

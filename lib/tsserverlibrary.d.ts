@@ -7183,6 +7183,7 @@ declare namespace ts {
         decreaseIndent(): void;
         getText(): string;
         rawWrite(s: string): void;
+        rawWriteLiteral(s: string): void;
         writeLiteral(s: string): void;
         getTextPos(): number;
         getLine(): number;

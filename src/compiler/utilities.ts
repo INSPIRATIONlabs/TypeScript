@@ -2129,6 +2129,7 @@ namespace ts {
         decreaseIndent(): void;
         getText(): string;
         rawWrite(s: string): void;
+        rawWriteLiteral(s: string): void;
         writeLiteral(s: string): void;
         getTextPos(): number;
         getLine(): number;
@@ -2194,6 +2195,17 @@ namespace ts {
             }
         }
 
+        function rawWriteLiteral(s: string) {
+            if (s && s.length) {
+                rawWrite(s);
+                const lineStartsOfS = computeLineStarts(s);
+                if (lineStartsOfS.length > 1) {
+                    lineCount = lineCount + lineStartsOfS.length - 1;
+                    linePos = output.length - s.length + lastOrUndefined(lineStartsOfS);
+                }
+            }
+        }
+
         function writeLine() {
             if (!lineStart) {
                 output += newLine;
@@ -2214,6 +2226,7 @@ namespace ts {
             rawWrite,
             writeTextOfNode,
             writeLiteral,
+            rawWriteLiteral,
             writeLine,
             increaseIndent: () => { indent++; },
             decreaseIndent: () => { indent--; },
