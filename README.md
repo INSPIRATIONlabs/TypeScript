@@ -6,7 +6,7 @@ This is a fork of TypeScript which behaves slightly differently in regards to em
 
 ## Changes
 
-Modified src/compiler/emitter.ts -> lib/tsc.js, lib/tsserver.js, lib/tsserverlibrary.ts, lib/typescript.js, lib/typescriptServices.js
+Modified src/compiler/ts.ts
 
 
 ## Core TypeScript Documentation
