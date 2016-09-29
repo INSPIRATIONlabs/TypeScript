@@ -6,7 +6,7 @@ This is a fork of TypeScript which behaves slightly differently in regards to em
 
 ## Changes
 
-Modified src/compiler/ts.ts
+Modified src/compiler/transformers/ts.ts
 
 
 ## Core TypeScript Documentation

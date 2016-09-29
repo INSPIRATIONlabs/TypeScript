@@ -1798,7 +1798,7 @@ namespace ts {
             return createIdentifier("Object");
         }
 
-        function serializeArrayTypeNode(node: any/*ArrayTypeNode*/, expressions?: Expression[]): Expression {
+        function serializeArrayTypeNode(node: ArrayTypeNode, expressions?: Expression[]): Expression {
           // work in progress
           if (!expressions) {
             expressions = [];
@@ -1807,6 +1807,7 @@ namespace ts {
           switch (child.kind) {
             case SyntaxKind.TypeReference:
               let childRefNode = serializeTypeReferenceNode(<TypeReferenceNode>child);
+              console.log(childRefNode.parent);
               expressions.push(createIdentifier("Array"), childRefNode);
               return createConstructorExpression(expressions);
             case SyntaxKind.ArrayType:
