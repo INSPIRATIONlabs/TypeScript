@@ -1744,7 +1744,7 @@ namespace ts {
 
                 case SyntaxKind.ArrayType:
                 case SyntaxKind.TupleType:
-                    return serializeArrayTypeNode(<ArrayTypeNode>node);
+                    return serializeArrayTypeNode(<ArrayTypeNode>node); // createIdentifier("Array");
 
                 case SyntaxKind.TypePredicate:
                 case SyntaxKind.BooleanKeyword:
@@ -1807,7 +1807,6 @@ namespace ts {
           switch (child.kind) {
             case SyntaxKind.TypeReference:
               let childRefNode = serializeTypeReferenceNode(<TypeReferenceNode>child);
-              console.log(childRefNode.parent);
               expressions.push(createIdentifier("Array"), childRefNode);
               return createConstructorExpression(expressions);
             case SyntaxKind.ArrayType:
